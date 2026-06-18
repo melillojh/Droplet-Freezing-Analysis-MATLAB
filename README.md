@@ -515,13 +515,9 @@ These files illustrate:
 \## Citation
 
 
-
 If you use this software or adapt parts of the workflow for your own research, please cite:
 
-
-
-J. H. Melillo.
-
+Melillo, J.H. (2026). Droplet Freezing Analysis MATLAB (Version 1.0.0). Zenodo. https://doi.org/10.5281/zenodo.20752380
 
 
 \*Droplet Freezing Analysis MATLAB.\*
