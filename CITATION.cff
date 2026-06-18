@@ -21,21 +21,4 @@ date-released: "2026-06-18"
 
 abstract: >
   MATLAB workflow for automated analysis of droplet freezing experiments
-  performed on temperature-controlled cold plates. The software combines
-  Cellpose-based droplet detection, background normalization,
-  running-average image analysis, extraction of temporal image metrics,
-  and automated determination of freezing times from contrast-based
-  step detection.
-
-keywords:
-  - ice nucleation
-  - droplet freezing
-  - cryobiology
-  - image analysis
-  - Cellpose
-  - microscopy
-  - cold plate
-  - MATLAB
-  - freezing detection
-  - ice crystallization
-```
+  performed on temperature-controlled cold plates.
