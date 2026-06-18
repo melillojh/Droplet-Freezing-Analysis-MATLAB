@@ -1,2 +1,570 @@
-# Droplet-Freezing-Analysis-MATLAB
-MATLAB pipeline for droplet freezing experiments, including Cellpose-based detection, background normalization, and time-resolved freezing metrics.
+# Droplet Freezing Analysis-MATLAB
+
+
+
+MATLAB workflow for automated analysis of droplet freezing experiments performed on temperature-controlled cold plates. The software combines Cellpose-based droplet detection, temporal image analysis, and automated freezing-time determination from microscopy videos.
+
+
+
+The workflow consists of two stages:
+
+
+
+1\. \*\*Video analysis\*\*
+
+
+
+&#x20;  \* Droplet detection using Cellpose.
+
+&#x20;  \* Manual correction of false or missing detections.
+
+&#x20;  \* Background normalization.
+
+&#x20;  \* Running-average image analysis.
+
+&#x20;  \* Extraction of temporal image metrics for each droplet.
+
+
+
+2\. \*\*Freezing-time determination\*\*
+
+
+
+&#x20;  \* Analysis of the temporal evolution of image contrast.
+
+&#x20;  \* Detection of freezing-induced transitions.
+
+&#x20;  \* Automatic determination of freezing times for individual droplets.
+
+
+
+The software was developed for experiments in which droplets are cooled on a temperature-controlled cold plate and imaged during freezing.
+
+
+
+\---
+
+
+
+\## Repository Structure
+
+
+
+```text
+
+Droplet-Freezing-Analysis-MATLAB/
+
+│
+
+├── README.md
+
+├── LICENSE
+
+├── CITATION.cff
+
+│
+
+├── src/
+
+│   ├── analyze\_video\_droplets\_running\_average.m
+
+│   └── analyze\_freezing\_times.m
+
+│
+
+├── results/
+
+│   └── Example analysis outputs
+
+│
+
+└── examples/
+
+```
+
+
+
+\---
+
+
+
+\## Requirements
+
+
+
+\### MATLAB
+
+
+
+Tested with recent MATLAB releases.
+
+
+
+Required toolboxes:
+
+
+
+\* Image Processing Toolbox
+
+\* Medical Imaging Toolbox
+
+
+
+\### Cellpose
+
+
+
+The droplet detection workflow uses Cellpose through MATLAB.
+
+
+
+Before running the software, install the MATLAB Medical Imaging Toolbox and the Cellpose support package for MATLAB.
+
+
+
+Cellpose is used to automatically segment droplets in the first frame of the video.
+
+
+
+\---
+
+
+
+\# Workflow
+
+
+
+\## Step 1 – Video Analysis
+
+
+
+Run:
+
+
+
+```matlab
+
+analyze\_video\_droplets\_running\_average
+
+```
+
+
+
+\### Video Selection
+
+
+
+The analysis begins by selecting:
+
+
+
+1\. The video file.
+
+2\. The start and end times of the video segment to analyze.
+
+3\. The averaging window (typically 2 seconds).
+
+
+
+\### Region of Interest Selection
+
+
+
+The user then selects the region containing the cold plate and droplets.
+
+
+
+Only this region is used for the subsequent analysis.
+
+
+
+\### Droplet Detection
+
+
+
+A representative droplet diameter is selected manually.
+
+
+
+This diameter is used by Cellpose to perform automatic droplet detection on the first frame.
+
+
+
+After automatic detection, the user can:
+
+
+
+\* Remove false detections.
+
+\* Add droplets that were missed.
+
+
+
+This semi-automatic correction step ensures that all droplets included in the analysis correspond to real experimental droplets.
+
+
+
+\---
+
+
+
+\## Running-Average Analysis
+
+
+
+The running-average analysis is the most important part of the workflow.
+
+
+
+Ice nucleation and crystal growth occur over a finite time interval and are often accompanied by noise, illumination fluctuations, and camera artifacts. Analyzing individual frames may therefore lead to inaccurate freezing detection.
+
+
+
+To improve robustness, the software averages all frames contained within a fixed time window (typically 2 seconds).
+
+
+
+For each averaging window:
+
+
+
+1\. The background intensity is normalized using the cold-plate region.
+
+2\. All frames inside the window are averaged.
+
+3\. Quantitative image metrics are calculated for each droplet.
+
+
+
+This procedure significantly improves the signal-to-noise ratio while preserving the optical changes associated with ice nucleation and crystal growth.
+
+
+
+\---
+
+
+
+\## Extracted Metrics
+
+
+
+For every droplet and averaging window, the software calculates:
+
+
+
+\### MeanGray
+
+
+
+Average grayscale intensity inside the droplet.
+
+
+
+\### ContrastStd
+
+
+
+Standard deviation of grayscale intensity inside the droplet.
+
+
+
+This parameter is particularly sensitive to the appearance of ice crystals and is the primary metric used for freezing detection.
+
+
+
+\### BrightMean
+
+
+
+Average intensity of the brightest pixels within the droplet.
+
+
+
+\### BrightFrac
+
+
+
+Fraction of bright pixels inside the droplet.
+
+
+
+\---
+
+
+
+\## Physical Basis
+
+
+
+When freezing occurs, the formation and growth of ice crystals modify the optical texture of the droplet.
+
+
+
+As a result:
+
+
+
+\* The image contrast changes.
+
+\* The intensity distribution changes.
+
+\* The brightest regions become more pronounced.
+
+
+
+These changes are reflected in the extracted image metrics and can be used to identify the freezing event.
+
+
+
+\---
+
+
+
+\## Outputs from Step 1
+
+
+
+The video-analysis stage generates:
+
+
+
+```text
+
+\*\_droplet\_info.csv
+
+\*\_running\_average\_metrics.csv
+
+\*\_summary.csv
+
+\*\_running\_average\_results.mat
+
+```
+
+
+
+The most important file is:
+
+
+
+```text
+
+\*\_running\_average\_metrics.csv
+
+```
+
+
+
+which contains the temporal evolution of all image metrics for every droplet.
+
+
+
+\---
+
+
+
+\# Step 2 – Freezing-Time Determination
+
+
+
+Run:
+
+
+
+```matlab
+
+analyze\_freezing\_times
+
+```
+
+
+
+This script reads the output generated by the video-analysis stage and determines the freezing time of each droplet.
+
+
+
+\---
+
+
+
+\## Freezing Detection Method
+
+
+
+For each droplet:
+
+
+
+1\. The ContrastStd signal is extracted as a function of time.
+
+2\. The signal is smoothed using a moving-median filter.
+
+3\. A step-detection algorithm identifies the strongest transition in the signal.
+
+4\. The freezing time is assigned to the point immediately before the transition.
+
+
+
+The freezing event typically produces an abrupt change in optical heterogeneity due to the appearance and propagation of ice crystals inside the droplet.
+
+
+
+Consequently, freezing appears as a characteristic step-like change in the contrast signal.
+
+
+
+\---
+
+
+
+\## Relating Freezing Time to Temperature
+
+
+
+The software determines the freezing time of each droplet.
+
+
+
+If a temperature profile is available for the experiment, the freezing time can be converted into the corresponding freezing temperature.
+
+
+
+For experiments performed under a constant cooling rate, each detected freezing event can therefore be directly associated with a crystallization temperature, enabling:
+
+
+
+\* Freezing-temperature distributions.
+
+\* Nucleation statistics.
+
+\* Survival curves.
+
+\* Comparison between different experimental conditions.
+
+
+
+\---
+
+
+
+\## Outputs from Step 2
+
+
+
+The freezing-analysis stage generates:
+
+
+
+```text
+
+droplet\_freezing\_times.txt
+
+droplet\_freezing\_full\_results.csv
+
+Droplet\_\*\_freezing.png
+
+```
+
+
+
+The file:
+
+
+
+```text
+
+droplet\_freezing\_times.txt
+
+```
+
+
+
+contains the freezing time of each droplet and can be directly used for statistical analysis.
+
+
+
+\---
+
+
+
+\## Results Folder
+
+
+
+The repository includes a `results/` folder containing example outputs generated by the workflow.
+
+
+
+These files illustrate:
+
+
+
+\* Droplet detection.
+
+\* Running-average analysis.
+
+\* Contrast evolution.
+
+\* Automatic freezing-time determination.
+
+
+
+\---
+
+
+
+\## Citation
+
+
+
+If you use this software or adapt parts of the workflow for your own research, please cite:
+
+
+
+J. H. Melillo.
+
+
+
+\*Droplet Freezing Analysis MATLAB.\*
+
+
+
+GitHub repository.
+
+
+
+\---
+
+
+
+\## Author
+
+
+
+\*\*Jorge Humberto Melillo\*\*
+
+
+
+ORCID:
+
+https://orcid.org/0000-0001-7642-0368
+
+
+
+GitHub:
+
+https://github.com/melillojh
+
+
+
+\---
+
+
+
+\## License
+
+
+
+MIT License.
+
+
+
