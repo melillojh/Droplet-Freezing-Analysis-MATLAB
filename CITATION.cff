@@ -26,15 +26,3 @@ abstract: >
   running-average image analysis, extraction of temporal image metrics,
   and automated determination of freezing times from contrast-based
   step detection.
-
-keywords:
-  - ice nucleation
-  - droplet freezing
-  - cryobiology
-  - image analysis
-  - Cellpose
-  - microscopy
-  - cold plate
-  - MATLAB
-  - freezing detection
-  - ice crystallization
