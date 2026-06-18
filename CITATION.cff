@@ -12,7 +12,3 @@ repository-code: "https://github.com/melillojh/Droplet-Freezing-Analysis-MATLAB"
 license: "MIT"
 version: "1.0.0"
 date-released: "2026-06-18"
-
-abstract: >
-  MATLAB workflow for automated analysis of droplet freezing experiments
-  performed on temperature-controlled cold plates.
